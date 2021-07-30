@@ -1,13 +1,11 @@
 package com.iambenkay.imagerepo.services.storage
 
 import com.iambenkay.imagerepo.utils.ImageSize
-import org.springframework.stereotype.Service
 import java.awt.image.BufferedImage
-import java.io.File
+import java.io.InputStream
 
-@Service
 interface StorageService {
     fun save(id: String, t: BufferedImage, size: ImageSize)
-    fun retrieve(id: String, size: ImageSize): File
+    fun retrieve(id: String, size: ImageSize): InputStream
     fun delete(id: String)
 }

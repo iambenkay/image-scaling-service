@@ -10,4 +10,4 @@ data class ImageDataResponse(
     override val error: Boolean,
     override val message: String,
     override val data: ImageData?
-): ApiResponse<ImageData>(error, message, data)
+) : ApiResponse<ImageData>(error, message, data)

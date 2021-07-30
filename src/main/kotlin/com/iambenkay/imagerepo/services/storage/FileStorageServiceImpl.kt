@@ -1,5 +1,6 @@
 package com.iambenkay.imagerepo.services.storage
 
+import com.iambenkay.imagerepo.exceptions.ImageLoadFailedException
 import com.iambenkay.imagerepo.exceptions.ImageNotDeletedException
 import com.iambenkay.imagerepo.exceptions.ImageNotFoundException
 import com.iambenkay.imagerepo.exceptions.ImageSaveFailedException
@@ -7,6 +8,7 @@ import com.iambenkay.imagerepo.utils.ImageSize
 import org.springframework.stereotype.Service
 import java.awt.image.BufferedImage
 import java.io.File
+import java.io.InputStream
 import javax.imageio.ImageIO
 
 @Service
@@ -25,10 +27,14 @@ class FileStorageServiceImpl : StorageService {
         }
     }
 
-    override fun retrieve(id: String, size: ImageSize): File {
+    override fun retrieve(id: String, size: ImageSize): InputStream {
         val file = File("uploads/${id}/${size.name.toLowerCase()}")
         if (file.exists()) {
-            return file
+            try {
+                return file.inputStream()
+            } catch (e: Exception) {
+                throw ImageLoadFailedException()
+            }
         } else {
             throw ImageNotFoundException()
         }

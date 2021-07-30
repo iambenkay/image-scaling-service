@@ -5,52 +5,29 @@ import java.awt.Image
 import java.awt.image.BufferedImage
 
 object ImageUtils {
-    /**
-     * Resizes BufferedImage using provided ImageSize
-     */
+
     fun resize(image: BufferedImage, size: ImageSize): BufferedImage {
-        if (image.height <= size.size && image.width <= size.size) {
-            // don't bother resizing if image is already smaller than size
+        if (image within size) {
             return image
         }
 
-        // generate resize factor by which to resize image bounds
-        val factor = size.size.toDouble() / image.width.coerceAtLeast(image.height)
-
-        // width and height of new image
-        val width = image.width * factor
-        val height = image.height * factor
-
-        // scale image
-        val img = image.getScaledInstance(width.toInt(), height.toInt(), Image.SCALE_SMOOTH)
-
-        // the former operation returns a ToolKitImage so we use Graphics2D to write it to a BufferedImage
-        val output = BufferedImage(width.toInt(), height.toInt(), image.type)
-        val g2d = output.createGraphics()
-        g2d.drawImage(img, 0, 0, null)
-        g2d.dispose()
-
-        return output
+        return image.scaleTo(size)
     }
 
-    /**
-     * Used to verify the mimetype of the uploaded image
-     */
     fun isImage(file: MultipartFile): Boolean {
-        // if image mime type does not start with 'image/' then it is not an image
         return Regex("^image/").containsMatchIn(file.contentType!!)
     }
 }
 
 enum class ImageSize(val size: Int) {
-    THUMB(60), // represents the size of a thumbnail image
-    THUMBX2(120), // represents the size of a thumbnail x2 image
-    MEDIUM(512), // represents the size of a medium image
-    ORIGINAL(Int.MAX_VALUE); // represents the size of the original image
+    THUMB(60),
+    THUMBX2(120),
+    MEDIUM(512),
+    ORIGINAL(Int.MAX_VALUE);
 
     companion object {
         fun parse(v: String): ImageSize {
-            return when (v) {
+            return when (v.toLowerCase()) {
                 "thumb" -> THUMB
                 "thumbx2" -> THUMBX2
                 "medium" -> MEDIUM
@@ -58,4 +35,35 @@ enum class ImageSize(val size: Int) {
             }
         }
     }
+}
+
+private infix fun BufferedImage.within(size: ImageSize): Boolean =
+    this.height <= size.size && this.width <= size.size
+
+private fun BufferedImage.widthFrom(size: ImageSize): Double {
+    val factor = size.size.toDouble() / this.width.coerceAtLeast(this.height)
+
+    return this.width * factor
+}
+
+private fun BufferedImage.heightFrom(size: ImageSize): Double {
+    val factor = size.size.toDouble() / this.width.coerceAtLeast(this.height)
+
+    return this.height * factor
+}
+
+private fun BufferedImage.scaleTo(size: ImageSize): BufferedImage {
+
+    val width = this.widthFrom(size)
+    val height = this.heightFrom(size)
+
+    val intermediateImage = this.getScaledInstance(width.toInt(), height.toInt(), Image.SCALE_SMOOTH)
+
+    val output = BufferedImage(width.toInt(), height.toInt(), this.type)
+
+    val g2d = output.createGraphics()
+    g2d.drawImage(intermediateImage, 0, 0, null)
+    g2d.dispose()
+
+    return output
 }

@@ -37,8 +37,7 @@ class ImageNotDeletedException : BadRequestException("The delete operation you r
 
 class ImageSaveFailedException : InternalServerErrorException("The save operation you requested could not be completed")
 
-class ImageRetrieveFailedException :
-    InternalServerErrorException("The save operation you requested could not be completed")
+class ImageLoadFailedException : InternalServerErrorException("The load operation you requested could not be completed")
 
 class ImageNotFoundException : NotFoundException("The retrieve operation you requested could not be completed")
 /* END */
